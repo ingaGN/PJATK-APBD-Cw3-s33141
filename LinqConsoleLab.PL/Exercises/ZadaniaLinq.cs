@@ -331,7 +331,17 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Wyzwanie01_StudenciZWiecejNizJednymAktywnymPrzedmiotem()
     {
-        throw Niezaimplementowano(nameof(Wyzwanie01_StudenciZWiecejNizJednymAktywnymPrzedmiotem));
+        return DaneUczelni.Studenci
+            .Join(
+                DaneUczelni.Zapisy,
+                student => student.Id,
+                zapis => zapis.StudentId,
+                (student, zapis) => new { student, zapis }
+            )
+            .Where(x => x.zapis.CzyAktywny)
+            .GroupBy(x => new { x.student.Imie, x.student.Nazwisko })
+            .Where(grupa => grupa.Count() > 1)
+            .Select(grupa => $"{grupa.Key.Imie} {grupa.Key.Nazwisko} - {grupa.Count()}");
     }
 
     /// <summary>
@@ -348,7 +358,17 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Wyzwanie02_PrzedmiotyStartujaceWKwietniuBezOcenKoncowych()
     {
-        throw Niezaimplementowano(nameof(Wyzwanie02_PrzedmiotyStartujaceWKwietniuBezOcenKoncowych));
+        return DaneUczelni.Przedmioty
+            .Join(
+                DaneUczelni.Zapisy,
+                przedmiot => przedmiot.Id,
+                zapis => zapis.PrzedmiotId,
+                (przedmiot, zapis) => new { przedmiot, zapis }
+            )
+            .Where(x => x.przedmiot.DataStartu.Month == 4 && x.przedmiot.DataStartu.Year == 2026)
+            .GroupBy(x => x.przedmiot.Nazwa)
+            .Where(grupa => grupa.All(x => x.zapis.OcenaKoncowa == null))
+            .Select(grupa => grupa.Key);
     }
 
     /// <summary>
